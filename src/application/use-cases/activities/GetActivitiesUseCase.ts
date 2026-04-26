@@ -4,7 +4,7 @@ import { Result } from '@shared/result/Result';
 import { ActivityQuery } from '@application/dtos/ActivityQuery';
 import { ActivityDTO } from '@application/dtos/ActivityDTO';
 import { PaginationDTO } from '@application/dtos/PaginationDTO';
-import { FarmNotFoundError } from '@domain/errors/NotFoundError';
+import { FarmNotFoundError } from '@domain/errors/FarmNotFoundError';
 
 @injectable()
 export class GetActivitiesUseCase {
