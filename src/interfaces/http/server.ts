@@ -10,7 +10,7 @@ import { farmRoutes } from '@interfaces/http/routes/farm.routes';
 import { activityRoutes } from '@interfaces/http/routes/activity.routes';
 import { sensorRoutes } from '@interfaces/http/routes/sensor.routes';
 import { setupSwagger } from '@interfaces/http/docs/swagger';
-import logger from '@shared/logger';
+import { userRoutes } from '@interfaces/http/routes/user.routes';
 
 export async function buildApp() {
     const app = Fastify({
@@ -44,6 +44,7 @@ export async function buildApp() {
     app.register(farmRoutes, { prefix: '/api/v1' });
     app.register(activityRoutes, { prefix: '/api/v1' });
     app.register(sensorRoutes, { prefix: '/api/v1' });
+    app.register(userRoutes, { prefix: '/api/v1' });
 
     return app;
 }
