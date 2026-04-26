@@ -1,0 +1,89 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String         @id @default(uuid())
+  name         String
+  email        String         @unique
+  password     String
+  role         String         @default("farmer")
+  farmName     String?        @map("farm_name")
+  farmId       String?        @map("farm_id")
+  refreshTokens RefreshToken[]
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @map("token_hash")
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime @map("expires_at")
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Farm {
+  id         String     @id @default(uuid())
+  name       String
+  location   String
+  userId     String     @map("user_id")
+  owner      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lots       Lot[]
+  activities Activity[]
+
+  @@map("farms")
+}
+
+model Lot {
+  id         String     @id @default(uuid())
+  name       String
+  crop       String
+  farmId     String     @map("farm_id")
+  farm       Farm       @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  activities Activity[]
+
+  @@map("lots")
+}
+
+model Activity {
+  id        String   @id @default(uuid())
+  type      String
+  crop      String
+  quantity  Float
+  unit      String
+  date      DateTime
+  notes     String?
+  farmId    String   @map("farm_id")
+  farm      Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  lotId     String   @map("lot_id")
+  lot       Lot      @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([farmId, date])
+  @@index([lotId])
+  @@map("activities")
+}
+
+model SensorReading {
+  id          String   @id @default(uuid())
+  farmId      String   @map("farm_id")
+  temperature Float
+  humidity    Float
+  recordedAt  DateTime @default(now()) @map("recorded_at")
+
+  @@index([farmId, recordedAt(sort: Desc)])
+  @@map("sensor_readings")
+}
