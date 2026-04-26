@@ -26,9 +26,18 @@ export class ChangePasswordUseCase {
         if (passwordResult.isFailure) return Result.fail(passwordResult.error);
 
         const newHash = await this.passwordService.hash(passwordResult.value.value);
-        const updated = User.create({ ...user, hashedPassword: newHash });
+        const updated = User.create({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            hashedPassword: newHash,
+            farmName: user.farmName,
+            farmId: user.farmId,
+        });
         await this.userRepo.update(updated);
 
         return Result.ok(undefined);
     }
+
 }

@@ -16,9 +16,9 @@ model User {
   farmName     String?        @map("farm_name")
   farmId       String?        @map("farm_id")
   refreshTokens RefreshToken[]
+  farms        Farm[]         // <- Relación inversa (un usuario tiene muchas fincas)
   createdAt    DateTime       @default(now()) @map("created_at")
   updatedAt    DateTime       @updatedAt @map("updated_at")
-
   @@map("users")
 }
 
@@ -39,7 +39,7 @@ model Farm {
   name       String
   location   String
   userId     String     @map("user_id")
-  owner      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   lots       Lot[]
   activities Activity[]
 
