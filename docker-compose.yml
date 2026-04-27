@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sga-postgres
+    environment:
+      POSTGRES_USER: sga_user
+      POSTGRES_PASSWORD: sga_password
+      POSTGRES_DB: sga_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sga-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: sga-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - sga-net
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sga-backend
+    ports:
+      - "8000:8000"
+    environment:
+      NODE_ENV: development
+      PORT: 8000
+      DATABASE_URL: "postgresql://sga_user:sga_password@postgres:5432/sga_db?schema=public"
+      REDIS_URL: "redis://redis:6379"
+      JWT_PRIVATE_KEY: "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----"
+      JWT_PUBLIC_KEY: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A...\n-----END PUBLIC KEY-----"
+      CORS_ORIGINS: "*"
+      LOG_LEVEL: debug
+      BCRYPT_SALT_ROUNDS: 12
+      MAX_ACTIVITIES_PER_PAGE: 100
+      ACCESS_TOKEN_EXPIRY_MINUTES: 15
+      REFRESH_TOKEN_EXPIRY_DAYS: 7
+    volumes:
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+    command: npm run dev
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - sga-net
+
+volumes:
+  postgres_data:
+
+networks:
+  sga-net:
+    driver: bridge
