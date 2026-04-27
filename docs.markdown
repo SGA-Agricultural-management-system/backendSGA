@@ -358,5 +358,28 @@ Registro: 201 + tokens.
 
 Login: 200 con credenciales correctas, 401 con incorrectas.
 
+npm run dev	Inicia en modo desarrollo con recarga automática
+npm run build	Compila TypeScript a dist/
+npm start	Ejecuta la versión compilada
+npm test	Corre todos los tests con Vitest
+npm run test:watch	Tests en modo watch
+npm run test:coverage	Tests con reporte de cobertura
+npm run migrate	Aplica migraciones de Prisma (desarrollo)
+npm run migrate:prod	Aplica migraciones en producción
+npm run seed	Ejecuta seeds de la base de datos
+npm run generate	Genera el cliente de Prisma
+npm run lint	Linting con ESLint
 
+22. Conclusiones
+El backend del SGA está construido sobre una base sólida de arquitectura hexagonal y principios de diseño modernos. La separación clara en capas permite:
+
+Mantenibilidad: cambios en infraestructura (por ejemplo, migrar a MongoDB) no afectan la lógica de negocio.
+
+Testabilidad: los casos de uso se prueban fácilmente con mocks.
+
+Escalabilidad: la API puede crecer en endpoints sin volverse frágil.
+
+Seguridad robusta: múltiples capas de protección desde validación hasta rotación de tokens.
+
+El proyecto queda listo para integrar CI/CD, desplegar en la nube y seguir ampliándose con nuevas funcionalidades.
 
