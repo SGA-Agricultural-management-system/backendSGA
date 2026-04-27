@@ -1,4 +1,4 @@
-# ============== STAGE 1: BUILDER ==============
+# ============== STAGE 1: BUILDER (Alpine es más ligero para compilar) ==============
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -10,16 +10,15 @@ RUN npm ci
 RUN npx prisma generate --schema=./src/infrastructure/database/prisma/schema.prisma
 RUN npm run build
 
-# ============== STAGE 2: PRODUCTION ==============
-FROM node:20-alpine AS production
-
-# Instalar la librería SSL 1.1 que requiere el motor nativo de Prisma
-RUN apk add --no-cache --repository https://dl-cdn.alpinelinux.org/alpine/edge/main libssl1.1
+# ============== STAGE 2: PRODUCTION (Debian‑slim para compatibilidad OpenSSL) ==============
+FROM node:20-slim AS production
 
 WORKDIR /app
 
-RUN addgroup -g 1001 -S sga && adduser -S sga -u 1001 -G sga
+# Crear usuario no root
+RUN addgroup --gid 1001 sga && adduser --uid 1001 --gid 1001 --disabled-password --gecos "" sga
 
+# Copiar desde builder
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
@@ -27,8 +26,10 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/src ./src
 
+# Instalar solo dependencias de producción
 RUN npm ci --omit=dev
 
+# Regenerar Prisma en el entorno slim (OpenSSL ya presente)
 ENV PRISMA_SCHEMA_PATH=/app/src/infrastructure/database/prisma/schema.prisma
 RUN npx prisma generate --schema=./src/infrastructure/database/prisma/schema.prisma
 
@@ -37,13 +38,11 @@ USER sga
 CMD ["node", "dist/main.js"]
 
 # ============== STAGE 3: DEVELOPMENT ==============
-FROM node:20-alpine AS development
-
-# Instalar la librería SSL 1.1 que requiere el motor nativo de Prisma
-RUN apk add --no-cache --repository https://dl-cdn.alpinelinux.org/alpine/edge/main libssl1.1
+FROM node:20-slim AS development
 
 WORKDIR /app
 
+# Copiar archivos de dependencias
 COPY package*.json ./
 RUN npm ci
 COPY src/infrastructure/database/prisma/schema.prisma ./prisma/
