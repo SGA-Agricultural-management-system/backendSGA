@@ -1,7 +1,7 @@
-import { IActivityRepository } from '@domain/repositories/IActivityRepository';
-import { Activity } from '@domain/entities/Activity';
-import { PaginatedResult } from '@shared/result/PaginatedResult';
-import { ActivityQuery } from '@application/dtos/ActivityQuery';
+import { IActivityRepository } from '../../src/domain/repositories/IActivityRepository';
+import { Activity } from '../../src/domain/entities/Activity';
+import { PaginatedResult } from '../../src/shared/result/PaginatedResult';
+import { ActivityQuery } from '../../src/application/dtos/ActivityQuery';
 
 export class MockActivityRepository implements IActivityRepository {
     private activities: Activity[] = [];

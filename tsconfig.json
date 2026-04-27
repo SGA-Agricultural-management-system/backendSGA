@@ -18,21 +18,22 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "moduleResolution": "node16",
+        "baseUrl": ".",
         "paths": {
             "@domain/*": [
-                "./src/domain/*"
+                "src/domain/*"
             ],
             "@application/*": [
-                "./src/application/*"
+                "src/application/*"
             ],
             "@infrastructure/*": [
-                "./src/infrastructure/*"
+                "src/infrastructure/*"
             ],
             "@interfaces/*": [
-                "./src/interfaces/*"
+                "src/interfaces/*"
             ],
             "@shared/*": [
-                "./src/shared/*"
+                "src/shared/*"
             ]
         }
     },

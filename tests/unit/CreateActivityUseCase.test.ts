@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { CreateActivityUseCase } from '@application/use-cases/activities/CreateActivityUseCase';
+import { CreateActivityUseCase } from '../../src/application/use-cases/activities/CreateActivityUseCase';
 import { MockActivityRepository } from '../mocks/MockActivityRepository';
 import { MockFarmRepository } from '../mocks/MockFarmRepository';
-import { Farm } from '@domain/entities/Farm';
+import { Farm } from '../../src/domain/entities/Farm';
 import { v4 as uuid } from 'uuid';
 
 describe('CreateActivityUseCase', () => {

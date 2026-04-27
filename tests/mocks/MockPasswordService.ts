@@ -1,4 +1,4 @@
-import { IPasswordService } from '@application/ports/IPasswordService';
+import { IPasswordService } from '../../src/application/ports/IPasswordService';
 
 export class MockPasswordService implements IPasswordService {
     async hash(plain: string): Promise<string> {

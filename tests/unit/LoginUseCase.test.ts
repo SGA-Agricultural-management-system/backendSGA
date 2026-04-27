@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { LoginUseCase } from '@application/use-cases/auth/LoginUseCase';
+import { LoginUseCase } from '../../src/application/use-cases/auth/LoginUseCase';
 import { MockUserRepository } from '../mocks/MockUserRepository';
 import { MockPasswordService } from '../mocks/MockPasswordService';
 import { MockTokenService } from '../mocks/MockTokenService';
-import { User } from '@domain/entities/User';
+import { User } from '../../src/domain/entities/User';
 import { v4 as uuid } from 'uuid';
 
 describe('LoginUseCase', () => {

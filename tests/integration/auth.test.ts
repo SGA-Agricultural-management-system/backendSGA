@@ -1,18 +1,19 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import Fastify from 'fastify';
+import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
-import { buildApp } from '@interfaces/http/server';
-import { container } from '@shared/container';
+import { buildApp } from '../../src/interfaces/http/server';
 
-// Sobreescribir en modo test con variables de entorno específicas
 describe('Auth Integration', () => {
-    let app: ReturnType<typeof Fastify>;
+    let app: FastifyInstance;
     let prisma: PrismaClient;
 
     beforeAll(async () => {
-        prisma = new PrismaClient({ datasourceUrl: process.env.TEST_DATABASE_URL });
-        // Limpiar tablas
+        prisma = new PrismaClient({
+            datasourceUrl: process.env.TEST_DATABASE_URL,
+        });
+        // Limpiar tablas en orden respetando FK
         await prisma.activity.deleteMany();
+        await prisma.sensorReading.deleteMany();
         await prisma.lot.deleteMany();
         await prisma.farm.deleteMany();
         await prisma.refreshToken.deleteMany();

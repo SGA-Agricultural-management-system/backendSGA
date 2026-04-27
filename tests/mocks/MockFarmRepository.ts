@@ -1,6 +1,6 @@
-import { IFarmRepository } from '@domain/repositories/IFarmRepository';
-import { Farm } from '@domain/entities/Farm';
-import { Lot } from '@domain/entities/Lot';
+import { IFarmRepository } from '../../src/domain/repositories/IFarmRepository';
+import { Farm } from '../../src/domain/entities/Farm';
+import { Lot } from '../../src/domain/entities/Lot';
 
 export class MockFarmRepository implements IFarmRepository {
     private farms: Farm[] = [];

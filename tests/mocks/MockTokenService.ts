@@ -1,6 +1,6 @@
-import { ITokenService, TokenPayload, TokenPair } from '@application/ports/ITokenService';
-import { Result } from '@shared/result/Result';
-import { AuthenticationError } from '@domain/errors/AuthenticationError';
+import { ITokenService, TokenPayload, TokenPair } from '../../src/application/ports/ITokenService';
+import { Result } from '../../src/shared/result/Result';
+import { AuthenticationError } from '../../src/domain/errors/AuthenticationError';
 
 export class MockTokenService implements ITokenService {
     async generateTokens(payload: TokenPayload): Promise<TokenPair> {
