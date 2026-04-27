@@ -6,15 +6,16 @@ import { IActivityRepository } from '@domain/repositories/IActivityRepository';
 import { ITokenService } from '@application/ports/ITokenService';
 import { IPasswordService } from '@application/ports/IPasswordService';
 import { ICacheService } from '@application/ports/ICacheService';
+import { INotificationService } from '@application/ports/INotificationService';
+import { ISensorService } from '@application/ports/ISensorService';
 import { PrismaUserRepository } from '@infrastructure/database/repositories/PrismaUserRepository';
 import { PrismaFarmRepository } from '@infrastructure/database/repositories/PrismaFarmRepository';
 import { PrismaActivityRepository } from '@infrastructure/database/repositories/PrismaActivityRepository';
 import { JwtTokenService } from '@infrastructure/auth/JwtTokenService';
 import { BcryptPasswordService } from '@infrastructure/auth/BcryptPasswordService';
 import { RedisAdapter } from '@infrastructure/cache/RedisAdapter';
-import { env } from '@shared/config/env';
-import PrismaClientSingleton from '@infrastructure/database/prisma/PrismaClientSingleton';
-import RedisClientSingleton from '@infrastructure/cache/RedisClientSingleton';
+import { EmailAdapter } from '@infrastructure/notifications/EmailAdapter';
+import { SensorAdapter } from '@infrastructure/sensors/SensorAdapter';
 
 // Repositories
 container.registerSingleton<IUserRepository>('IUserRepository', PrismaUserRepository);
@@ -25,5 +26,9 @@ container.registerSingleton<IActivityRepository>('IActivityRepository', PrismaAc
 container.registerSingleton<ITokenService>('ITokenService', JwtTokenService);
 container.registerSingleton<IPasswordService>('IPasswordService', BcryptPasswordService);
 container.registerSingleton<ICacheService>('ICacheService', RedisAdapter);
+
+// Notificaciones y sensores
+container.registerSingleton<INotificationService>('INotificationService', EmailAdapter);
+container.registerSingleton<ISensorService>('ISensorService', SensorAdapter);
 
 export { container };
