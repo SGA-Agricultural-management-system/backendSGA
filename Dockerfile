@@ -13,8 +13,8 @@ RUN npm run build
 # ============== STAGE 2: PRODUCTION ==============
 FROM node:20-alpine AS production
 
-# Instalar OpenSSL 1.1 (compatibilidad con Prisma Engine en Alpine)
-RUN apk add --no-cache openssl1.1-compat
+# Instalar OpenSSL 1.1 (Prisma Engine lo requiere) desde edge/community
+RUN apk add --no-cache --repository https://dl-cdn.alpinelinux.org/alpine/edge/community openssl1.1-compat
 
 WORKDIR /app
 
@@ -39,8 +39,8 @@ CMD ["node", "dist/main.js"]
 # ============== STAGE 3: DEVELOPMENT ==============
 FROM node:20-alpine AS development
 
-# Instalar OpenSSL 1.1 (compatibilidad con Prisma)
-RUN apk add --no-cache openssl1.1-compat
+# Instalar OpenSSL 1.1 (ineludible para Prisma)
+RUN apk add --no-cache --repository https://dl-cdn.alpinelinux.org/alpine/edge/community openssl1.1-compat
 
 WORKDIR /app
 
