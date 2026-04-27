@@ -1,18 +1,13 @@
 # ============== STAGE 1: BUILDER ==============
-FROM node:20-alpine AS builder
-
+FROM node:20-alpine AS development
 WORKDIR /app
-
 COPY package*.json ./
-COPY prisma ./prisma/
-
 RUN npm ci
-
 COPY src/ ./src/
 COPY tsconfig.json ./
-
 RUN npx prisma generate --schema=./src/infrastructure/database/prisma/schema.prisma
-RUN npm run build
+EXPOSE 8000
+CMD ["npm", "run", "dev"]
 
 # ============== STAGE 2: PRODUCTION ==============
 FROM node:20-alpine
