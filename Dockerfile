@@ -1,35 +1,26 @@
 # ============== STAGE 1: BUILDER ==============
-FROM node:20-alpine AS development
+FROM node:20-alpine AS builder
+
 WORKDIR /app
-<<<<<<< Updated upstream
-COPY package*.json ./
-RUN npm ci
-COPY src/ ./src/
-COPY tsconfig.json ./
-RUN npx prisma generate --schema=./src/infrastructure/database/prisma/schema.prisma
-EXPOSE 8000
-CMD ["npm", "run", "dev"]
-=======
 
 # Copiar archivos de dependencias
 COPY package*.json ./
 
-# Copiar código fuente (incluye el schema de Prisma en src/)
+# Copiar código fuente completo
 COPY src/ ./src/
 COPY tsconfig.json ./
 
 # Instalar TODAS las dependencias
 RUN npm ci
 
-# Generar cliente Prisma apuntando al schema en src/
+# Generar cliente Prisma
 RUN npx prisma generate --schema=./src/infrastructure/database/prisma/schema.prisma
 
-# Compilar TypeScript
+# Compilar TypeScript a JavaScript
 RUN npm run build
->>>>>>> Stashed changes
 
 # ============== STAGE 2: PRODUCTION ==============
-FROM node:20-alpine
+FROM node:20-alpine AS production
 
 WORKDIR /app
 
@@ -47,10 +38,30 @@ COPY --from=builder /app/src ./src
 # Instalar SOLO dependencias de producción
 RUN npm ci --omit=dev
 
-# Establecer la ruta del schema para Prisma
+# Establecer la ruta del schema y regenerar Prisma para producción
 ENV PRISMA_SCHEMA_PATH=/app/src/infrastructure/database/prisma/schema.prisma
 RUN npx prisma generate --schema=./src/infrastructure/database/prisma/schema.prisma
 
 EXPOSE 8000
 USER sga
 CMD ["node", "dist/main.js"]
+
+# ============== STAGE 3: DEVELOPMENT ==============
+FROM node:20-alpine AS development
+
+WORKDIR /app
+
+# Copiar archivos de dependencias
+COPY package*.json ./
+
+# Instalar TODAS las dependencias (incluye devDependencies como tsx)
+RUN npm ci
+
+# Copiar el schema de Prisma para generar el cliente
+COPY src/infrastructure/database/prisma/schema.prisma ./prisma/
+RUN npx prisma generate --schema=./prisma/schema.prisma
+
+EXPOSE 8000
+
+# Comando por defecto para desarrollo (iniciar con tsx watch)
+CMD ["npm", "run", "dev"]
