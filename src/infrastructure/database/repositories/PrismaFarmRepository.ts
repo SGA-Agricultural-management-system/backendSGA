@@ -5,6 +5,20 @@ import { Lot } from '@domain/entities/Lot';
 import PrismaClientSingleton from '../prisma/PrismaClientSingleton';
 import { PrismaClient } from '@prisma/client';
 
+// Interfaces locales que reflejan exactamente lo que Prisma devuelve
+interface FarmRecord {
+    id: string;
+    name: string;
+    location: string;
+    lots?: LotRecord[];
+}
+
+interface LotRecord {
+    id: string;
+    name: string;
+    crop: string;
+}
+
 @injectable()
 export class PrismaFarmRepository implements IFarmRepository {
     private readonly prisma: PrismaClient;
@@ -18,7 +32,7 @@ export class PrismaFarmRepository implements IFarmRepository {
             where: { userId },
             include: { lots: true },
         });
-        return farms.map(f => this.toDomain(f));
+        return farms.map((f: FarmRecord) => this.toDomain(f));
     }
 
     async findById(id: string): Promise<Farm | null> {
@@ -26,20 +40,20 @@ export class PrismaFarmRepository implements IFarmRepository {
             where: { id },
             include: { lots: true },
         });
-        return farm ? this.toDomain(farm) : null;
+        return farm ? this.toDomain(farm as FarmRecord) : null;
     }
 
     async findLotsByFarmId(farmId: string): Promise<Lot[]> {
         const lots = await this.prisma.lot.findMany({
             where: { farmId },
         });
-        return lots.map(lot =>
+        return lots.map((lot: LotRecord) =>
             Lot.create({ id: lot.id, name: lot.name, crop: lot.crop }),
         );
     }
 
-    private toDomain(farmRecord: any): Farm {
-        const lots = (farmRecord.lots || []).map((lot: any) =>
+    private toDomain(farmRecord: FarmRecord): Farm {
+        const lots = (farmRecord.lots || []).map((lot: LotRecord) =>
             Lot.create({ id: lot.id, name: lot.name, crop: lot.crop }),
         );
         return Farm.create(

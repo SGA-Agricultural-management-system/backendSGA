@@ -3,6 +3,7 @@ import { inject, injectable } from 'tsyringe';
 import { GetFarmsUseCase } from '@application/use-cases/farms/GetFarmsUseCase';
 import { GetFarmByIdUseCase } from '@application/use-cases/farms/GetFarmByIdUseCase';
 import { GetLotsUseCase } from '@application/use-cases/farms/GetLotsUseCase';
+import { DomainError } from '@domain/errors/DomainError';
 
 @injectable()
 export class FarmController {
@@ -22,7 +23,7 @@ export class FarmController {
         const { id } = request.params as { id: string };
         const result = await this.getFarmByIdUseCase.execute(id);
         if (result.isFailure) {
-            return reply.status(404).send({ error: result.error.message, code: result.error.code });
+            return this.handleError(result.error, reply);
         }
         return reply.send(result.value);
     }
@@ -31,8 +32,21 @@ export class FarmController {
         const { id } = request.params as { id: string };
         const result = await this.getLotsUseCase.execute(id);
         if (result.isFailure) {
-            return reply.status(404).send({ error: result.error.message, code: result.error.code });
+            return this.handleError(result.error, reply);
         }
         return reply.send(result.value);
+    }
+
+    private handleError(error: Error, reply: FastifyReply) {
+        if (error instanceof DomainError) {
+            return reply.status(error.statusCode).send({
+                error: error.message,
+                code: error.code,
+            });
+        }
+        return reply.status(500).send({
+            error: 'Internal server error',
+            code: 'INTERNAL_ERROR',
+        });
     }
 }

@@ -6,7 +6,20 @@ import { Quantity } from '@domain/value-objects/Quantity';
 import { PaginatedResult } from '@shared/result/PaginatedResult';
 import { ActivityQuery } from '@application/dtos/ActivityQuery';
 import PrismaClientSingleton from '../prisma/PrismaClientSingleton';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+
+// Interfaz local que describe el registro devuelto por Prisma
+interface ActivityRecord {
+    id: string;
+    type: string;
+    crop: string;
+    quantity: number;
+    unit: string;
+    date: Date;
+    notes: string | null;
+    farmId: string;
+    lotId: string;
+}
 
 @injectable()
 export class PrismaActivityRepository implements IActivityRepository {
@@ -18,7 +31,7 @@ export class PrismaActivityRepository implements IActivityRepository {
 
     async findByFarmId(query: ActivityQuery): Promise<PaginatedResult<Activity>> {
         const { farmId, type, page, limit } = query;
-        const where: Prisma.ActivityWhereInput = { farmId };
+        const where: { farmId: string; type?: string } = { farmId };
         if (type) {
             where.type = type;
         }
@@ -34,7 +47,7 @@ export class PrismaActivityRepository implements IActivityRepository {
         ]);
 
         return {
-            data: data.map(record => this.toDomain(record)),
+            data: data.map((record: ActivityRecord) => this.toDomain(record)),
             total,
             page,
             limit,
@@ -65,13 +78,12 @@ export class PrismaActivityRepository implements IActivityRepository {
         return record ? this.toDomain(record) : null;
     }
 
-    private toDomain(record: any): Activity {
+    private toDomain(record: ActivityRecord): Activity {
         const typeResult = ActivityType.fromString(record.type);
         const quantity = Quantity.create(record.quantity, record.unit);
-        // Asumimos que los datos de BD son válidos
         return Activity.create({
             id: record.id,
-            type: typeResult.value, // en BD siempre guardamos string válido
+            type: typeResult.value,
             lotId: record.lotId,
             crop: record.crop,
             quantity: quantity.value,
@@ -81,7 +93,17 @@ export class PrismaActivityRepository implements IActivityRepository {
         });
     }
 
-    private toPrisma(activity: Activity): any {
+    private toPrisma(activity: Activity): {
+        id: string;
+        type: string;
+        lotId: string;
+        crop: string;
+        quantity: number;
+        unit: string;
+        date: Date;
+        notes: string | null;
+        farmId: string;
+    } {
         return {
             id: activity.id,
             type: activity.type.value,
