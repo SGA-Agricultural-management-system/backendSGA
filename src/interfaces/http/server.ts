@@ -46,5 +46,8 @@ export async function buildApp() {
     app.register(sensorRoutes, { prefix: '/api/v1' });
     app.register(userRoutes, { prefix: '/api/v1' });
 
+    // Health check endpoint
+    app.get('/health', { logLevel: 'warn' }, async () => ({ status: 'ok' }));
+
     return app;
 }
