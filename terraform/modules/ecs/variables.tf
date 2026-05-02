@@ -1,0 +1,15 @@
+variable "env" { type = string }
+variable "cluster_name" { type = string }
+variable "cpu" { type = number }
+variable "memory" { type = number }
+variable "desired_count" { type = number }
+variable "container_image" { type = string }
+variable "container_port" { type = number }
+variable "private_subnet_ids" { type = list(string) }
+variable "vpc_id" { type = string }
+variable "alb_target_group_arn" { type = string }
+variable "ecs_sg_id" { type = string }
+variable "execution_role_arn" { type = string }
+variable "task_role_arn" { type = string }
+variable "secrets" { type = list(map(string)) }
+variable "environment_vars" { type = map(string) }
