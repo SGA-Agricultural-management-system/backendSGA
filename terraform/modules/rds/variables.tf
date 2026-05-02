@@ -1,0 +1,11 @@
+variable "env" { type = string }
+variable "instance_class" { type = string }
+variable "storage_size" { type = number }
+variable "max_storage" { type = number }
+variable "multi_az" { type = bool }
+variable "backup_retention_days" { type = number }
+variable "subnet_ids" { type = list(string) }
+variable "vpc_security_group_ids" { type = list(string) }
+variable "db_name" { type = string }
+variable "username" { type = string }
+variable "password" { type = string }
