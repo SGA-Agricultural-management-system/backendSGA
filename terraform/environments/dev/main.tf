@@ -23,7 +23,7 @@ resource "aws_security_group" "ecs" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-}
+  }
 }
 
 resource "aws_security_group" "rds" {
@@ -86,12 +86,6 @@ module "elasticache" {
   redis_security_group_id = aws_security_group.redis.id
 }
 
-# IAM roles - si no tienes permisos, comentamos este módulo y usamos roles existentes
-# module "iam" {
-#   source = "../../modules/iam"
-#   env    = var.env
-# }
-
 # ====== IAM Roles para ECS ======
 resource "aws_iam_role" "ecs_execution" {
   name = "sga-${var.env}-execution-role"
@@ -144,12 +138,6 @@ resource "aws_iam_role_policy_attachment" "task_s3" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
-# Asignamos política gestionada para S3 (opcional)
-resource "aws_iam_role_policy_attachment" "task_s3" {
-  role       = aws_iam_role.ecs_task.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"  # en producción restringir a solo los buckets necesarios
-}
-
 # Secretos desde Secrets Manager (los creamos manualmente después)
 locals {
   secrets = [
@@ -187,7 +175,7 @@ module "ecs" {
   vpc_id               = module.vpc.vpc_id
   alb_target_group_arn = module.alb.target_group_arn
   ecs_sg_id            = aws_security_group.ecs.id
-  execution_role_arn   = data.aws_iam_role.ecs_execution.arn
+  execution_role_arn   = aws_iam_role.ecs_execution.arn   # ← corregido
   task_role_arn        = aws_iam_role.ecs_task.arn
   secrets              = local.secrets
   environment_vars = {
