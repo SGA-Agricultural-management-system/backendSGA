@@ -6,7 +6,7 @@ resource "aws_db_subnet_group" "db" {
 resource "aws_db_instance" "primary" {
   identifier             = "sga-${var.env}-db"
   engine                 = "postgres"
-  engine_version         = "15.7"
+  engine_version         = "15.8"
   instance_class         = var.instance_class
   allocated_storage      = var.storage_size
   max_allocated_storage  = var.max_storage

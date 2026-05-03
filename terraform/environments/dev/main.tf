@@ -86,60 +86,13 @@ module "elasticache" {
   redis_security_group_id = aws_security_group.redis.id
 }
 
-# ====== IAM Roles para ECS ======
-resource "aws_iam_role" "ecs_execution" {
-  name = "sga-${var.env}-execution-role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = { Service = "ecs-tasks.amazonaws.com" }
-      Action = "sts:AssumeRole"
-    }]
-  })
-}
+# Datos de la cuenta usados más abajo
+data "aws_caller_identity" "current" {}
 
-resource "aws_iam_role_policy_attachment" "ecs_execution_policy" {
-  role       = aws_iam_role.ecs_execution.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-resource "aws_iam_policy" "read_secrets" {
-  name        = "sga-${var.env}-read-secrets"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect   = "Allow"
-      Action   = ["secretsmanager:GetSecretValue"]
-      Resource = "arn:aws:secretsmanager:*:${data.aws_caller_identity.current.account_id}:secret:sga/${var.env}/*"
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "read_secrets_attach" {
-  role       = aws_iam_role.ecs_execution.name
-  policy_arn = aws_iam_policy.read_secrets.arn
-}
-
-resource "aws_iam_role" "ecs_task" {
-  name = "sga-${var.env}-task-role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = { Service = "ecs-tasks.amazonaws.com" }
-      Action = "sts:AssumeRole"
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "task_s3" {
-  role       = aws_iam_role.ecs_task.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-}
-
-# Secretos desde Secrets Manager
+# Secreto del ARN del rol de servicio ECS
 locals {
+  ecs_service_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
+
   secrets = [
     {
       name      = "DATABASE_URL"
@@ -160,8 +113,6 @@ locals {
   ]
 }
 
-data "aws_caller_identity" "current" {}
-
 module "ecs" {
   source               = "../../modules/ecs"
   env                  = var.env
@@ -175,8 +126,8 @@ module "ecs" {
   vpc_id               = module.vpc.vpc_id
   alb_target_group_arn = module.alb.target_group_arn
   ecs_sg_id            = aws_security_group.ecs.id
-  execution_role_arn   = aws_iam_role.ecs_execution.arn
-  task_role_arn        = aws_iam_role.ecs_task.arn
+  execution_role_arn   = local.ecs_service_role_arn   # usar rol administrado
+  task_role_arn        = local.ecs_service_role_arn   # usar el mismo rol para tareas
   secrets              = local.secrets
   environment_vars = {
     PORT = "8000"
