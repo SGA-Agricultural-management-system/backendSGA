@@ -92,12 +92,41 @@ module "elasticache" {
 #   env    = var.env
 # }
 
-# Para simplificar, usamos el rol de ejecución por defecto "ecsTaskExecutionRole" que puede existir en la cuenta
-data "aws_iam_role" "ecs_execution" {
-  name = "ecsTaskExecutionRole"
+# ====== IAM Roles para ECS ======
+resource "aws_iam_role" "ecs_execution" {
+  name = "sga-${var.env}-execution-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = { Service = "ecs-tasks.amazonaws.com" }
+      Action = "sts:AssumeRole"
+    }]
+  })
 }
 
-# Rol de tarea (puedes usar uno existente o crearlo manualmente)
+resource "aws_iam_role_policy_attachment" "ecs_execution_policy" {
+  role       = aws_iam_role.ecs_execution.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_policy" "read_secrets" {
+  name        = "sga-${var.env}-read-secrets"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["secretsmanager:GetSecretValue"]
+      Resource = "arn:aws:secretsmanager:*:${data.aws_caller_identity.current.account_id}:secret:sga/${var.env}/*"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "read_secrets_attach" {
+  role       = aws_iam_role.ecs_execution.name
+  policy_arn = aws_iam_policy.read_secrets.arn
+}
+
 resource "aws_iam_role" "ecs_task" {
   name = "sga-${var.env}-task-role"
   assume_role_policy = jsonencode({
@@ -108,6 +137,11 @@ resource "aws_iam_role" "ecs_task" {
       Action = "sts:AssumeRole"
     }]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "task_s3" {
+  role       = aws_iam_role.ecs_task.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
 # Asignamos política gestionada para S3 (opcional)
