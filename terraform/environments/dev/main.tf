@@ -138,7 +138,7 @@ resource "aws_iam_role_policy_attachment" "task_s3" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
-# Secretos desde Secrets Manager (los creamos manualmente después)
+# Secretos desde Secrets Manager
 locals {
   secrets = [
     {
@@ -175,7 +175,7 @@ module "ecs" {
   vpc_id               = module.vpc.vpc_id
   alb_target_group_arn = module.alb.target_group_arn
   ecs_sg_id            = aws_security_group.ecs.id
-  execution_role_arn   = aws_iam_role.ecs_execution.arn   # ← corregido
+  execution_role_arn   = aws_iam_role.ecs_execution.arn
   task_role_arn        = aws_iam_role.ecs_task.arn
   secrets              = local.secrets
   environment_vars = {
