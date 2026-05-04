@@ -126,8 +126,8 @@ module "ecs" {
   vpc_id               = module.vpc.vpc_id
   alb_target_group_arn = module.alb.target_group_arn
   ecs_sg_id            = aws_security_group.ecs.id
-  execution_role_arn   = local.ecs_service_role_arn   # usar rol administrado
-  task_role_arn        = local.ecs_service_role_arn   # usar el mismo rol para tareas
+  execution_role_arn   = "arn:aws:iam::488475962009:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"   # usar rol administrado
+  task_role_arn        = "arn:aws:iam::488475962009:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"   # usar el mismo rol para tareas
   secrets              = local.secrets
   environment_vars = {
     PORT = "8000"
