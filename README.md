@@ -485,4 +485,4 @@ Este proyecto está bajo la licencia **MIT**. Consulta el archivo [LICENSE](LICE
 
 **SGA Backend** · Node.js · TypeScript · Fastify · PostgreSQL · Redis · AWS
 
-</div>
+</div> 
